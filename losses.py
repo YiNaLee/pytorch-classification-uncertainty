@@ -8,13 +8,14 @@ def relu_evidence(y):
 
 
 def exp_evidence(y):
-    return torch.exp(torch.clamp(y, -10, 10))
+    return torch.exp(torch.clamp(y, -10, 10))#Clamp用于将数值限制在-10到10
 
 
 def softplus_evidence(y):
     return F.softplus(y)
 
-
+#这里出现的alpha最后在调用时，值为经过relu_evidence激活后的evidence +1（这里激活保证了输出作为evidence证据时的非负性，alpha要+1是因为需要作为
+#狄利克雷分布的参数
 def kl_divergence(alpha, num_classes, device=None):
     if not device:
         device = get_device()

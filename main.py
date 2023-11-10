@@ -77,7 +77,7 @@ def main():
         num_classes = 10
 
         model = LeNet(dropout=args.dropout)
-
+        # 使用uncertainty度量的话，损失函数是edl_digamma_loss,或者edl_log_loss,或者edl_mse_loss
         if use_uncertainty:
             if args.digamma:
                 criterion = edl_digamma_loss
@@ -88,6 +88,9 @@ def main():
             else:
                 parser.error("--uncertainty requires --mse, --log or --digamma.")
         else:
+            #否则就是传统用于分类的交叉熵损失，这个是KL的近似
+            #CrossEntropyLoss=-sum(y_actual*log(Y_predicted)
+
             criterion = nn.CrossEntropyLoss()
 
         optimizer = optim.Adam(model.parameters(), lr=1e-3, weight_decay=0.005)
