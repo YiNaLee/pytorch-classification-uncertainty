@@ -15,12 +15,13 @@ def softplus_evidence(y):
     return F.softplus(y)
 
 #这里出现的alpha最后在调用时，值为经过relu_evidence激活后的evidence +1（这里激活保证了输出作为evidence证据时的非负性，alpha要+1是因为需要作为
-#狄利克雷分布的参数
+#狄利克雷分布的参数 alpha是一个行向量 【a1,a2,a3...ak】
+#kl散度和毫无证据的ONES来进行比较
 def kl_divergence(alpha, num_classes, device=None):
     if not device:
         device = get_device()
     ones = torch.ones([1, num_classes], dtype=torch.float32, device=device)
-    sum_alpha = torch.sum(alpha, dim=1, keepdim=True)
+    sum_alpha = torch.sum(alpha, dim=1, keepdim=True)#sum_alpha是狄利克雷强度S=sum(a_i)
     first_term = (
         torch.lgamma(sum_alpha)
         - torch.lgamma(alpha).sum(dim=1, keepdim=True)
@@ -43,6 +44,7 @@ def loglikelihood_loss(y, alpha, device=None):
     alpha = alpha.to(device)
     S = torch.sum(alpha, dim=1, keepdim=True)
     loglikelihood_err = torch.sum((y - (alpha / S)) ** 2, dim=1, keepdim=True)
+    #alpha/S=pi 将均值作为预测概率 与真实标签进行比较，
     loglikelihood_var = torch.sum(
         alpha * (S - alpha) / (S * S * (S + 1)), dim=1, keepdim=True
     )
